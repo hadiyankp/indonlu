@@ -9,6 +9,11 @@ from transformers import AutoTokenizer
 #####
 # Term Extraction Airy
 #####
+dataset_path = 'indonlu/dataset/smsa_doc-sentiment-prosa/dataset.csv'
+the_data = pd.read_csv(dataset_path)
+the_data.drop('Unnamed: 0',axis=1,inplace=True)
+the_data.head()
+
 class AspectExtractionDataset(Dataset):
     # Static constant variable
     LABEL2INDEX = {'I-SENTIMENT': 0, 'O': 1, 'I-ASPECT': 2, 'B-SENTIMENT': 3, 'B-ASPECT': 4}
@@ -501,16 +506,16 @@ class EntailmentDataLoader(DataLoader):
 #####
 # Document Sentiment Prosa
 #####
-class DocumentSentimentDataset(Dataset):
+class DocumentSentimentDataset(dataset_path):
     # Static constant variable
-    LABEL2INDEX = {'positive': 0, 'neutral': 1, 'negative': 2}
-    INDEX2LABEL = {0: 'positive', 1: 'neutral', 2: 'negative'}
+    LABEL2INDEX = {'1': 0, '2': 1, '3': 2}
+    INDEX2LABEL = {0: '1', 1: '2', 2: '3'}
     NUM_LABELS = 3
     
     def load_dataset(self, path): 
         df = pd.read_csv(path, sep='\t', header=None)
-        df.columns = ['text','sentiment']
-        df['sentiment'] = df['sentiment'].apply(lambda lab: self.LABEL2INDEX[lab])
+        df.columns = ['Kalimat','Label']
+        df['Label'] = df['Label'].apply(lambda lab: self.LABEL2INDEX[lab])
         return df
     
     def __init__(self, dataset_path, tokenizer, no_special_token=False, *args, **kwargs):
@@ -520,9 +525,9 @@ class DocumentSentimentDataset(Dataset):
     
     def __getitem__(self, index):
         data = self.data.loc[index,:]
-        text, sentiment = data['text'], data['sentiment']
+        text, sentiment = data['Kalimat'], data['Tabel']
         subwords = self.tokenizer.encode(text, add_special_tokens=not self.no_special_token)
-        return np.array(subwords), np.array(sentiment), data['text']
+        return np.array(subwords), np.array(sentiment), data['Kalimat']
     
     def __len__(self):
         return len(self.data)    
